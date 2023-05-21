@@ -1,12 +1,13 @@
-from flask import Flask, request, jsonify, make_response
-from concurrent.futures import ThreadPoolExecutor
+
+"""
+Code below for setting up the context of the chatbot and connecting to openai API.
+"""
 
 import openai
+
+# Set the API key
 API_KEY = "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"
 openai.api_key  = API_KEY
-
-app = Flask(__name__)
-executor = ThreadPoolExecutor()
 
 def get_completion_from_messages(messages, model="gpt-3.5-turbo", temperature=0):
     response = openai.ChatCompletion.create(
@@ -34,7 +35,7 @@ def conversation(role = "system", content = "Start the conversation.", temperatu
         messages.append(
             {"role": role, "content": content}
         )
-        return(role, content)
+        return(role, content, messages)
 
     except Exception as error:
         print(f"Error: {error}. \nPlease try again")
@@ -78,29 +79,46 @@ bottled water 5.00 \
 messeges = []
 messages =  context.copy()
 
+"""
+Code below for python middleware run on Flask
+"""
+
+from flask import Flask, request
+import requests
+from concurrent.futures import ThreadPoolExecutor
+
+app = Flask(__name__)
+executor = ThreadPoolExecutor()
+
+DEBUG = False
+
 @app.route('/api', methods=['POST'])
-async def api_handler():
+def api_handler():
     role = request.form.get('role')
     content = request.form.get('content')
 
     if role not in ['system', 'user'] or not content:
         return 'Invalid request', 400
 
-    # Process the request asynchronously
-    #future = executor.submit(apicall, role, content)
-    #future.add_done_callback(handle_result)
-    response = await executor.submit(apicall, role, content)
-    print(response)
-    return(response)
+    # Process the request asynchronously using ThreadPoolExecutor
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(apicall, role, content)
+        role, content, messages = future.result()
 
-    #return 'Request received and queued for processing', 200
+    # If DEBUG than return also the role and messages object to the user
+    # Otherwise return only the content to the user
+    if DEBUG:
+        return({"role":role, "content":content, "messages": messages})
+    else:
+        return({"content":content})
 
 def apicall(role, content):
+
     # Process the request based on role and content
-    role, content = conversation(role, content)
+    role, content, messages = conversation(role, content)
 
     # Return the result
-    return jsonify({'role': role, 'content': content})
+    return role, content, messages
 
 if __name__ == '__main__':
     app.run(threaded=True)
