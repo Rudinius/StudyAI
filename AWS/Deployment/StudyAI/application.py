@@ -15,6 +15,10 @@ executor = ThreadPoolExecutor()
 
 DEBUG = False
 
+@app.route('/', methods=['GET'])
+def home():
+    return("Welcome to StudyAI")
+
 @app.route('/api/pizza', methods=['POST'])
 def api_handler():
 
