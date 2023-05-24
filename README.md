@@ -1,1 +1,1 @@
-# StudyBot
+# StudyAI
