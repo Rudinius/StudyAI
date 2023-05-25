@@ -1,0 +1,6 @@
+cd var/app/venv/staging.../bin
+source venv
+
+cd var/app/current
+gunicorn -b 0.0.0.0:8000 application:app
+
