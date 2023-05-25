@@ -1,7 +1,3 @@
-"""
-Code below for python middleware run on Flask
-"""
-
 from flask import Flask, request, session
 from concurrent.futures import ThreadPoolExecutor
 from api_call_openai import conversation
@@ -69,4 +65,4 @@ def apicall(messages, role, content):
     return messages, role, content
 
 if __name__ == '__main__':
-    app.run(threaded=True)
+    app.run()
