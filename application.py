@@ -26,6 +26,15 @@ def delivery_handler_v1():
     # Pass the get_context_delivery function to handler
     return handler(contexts.get_context_delivery)
 
+@app.route('/api/v1/resetsession', methods=['GET'])
+def resetsession_handler_v1():
+    if session.get("messages"):
+        session["messages"] = ""
+        return "Session cleared", 200
+    else:
+        return "Session not found/was empty already", 200
+
+
 def handler(get_context):
 
     supported_roles = ['user']
@@ -56,8 +65,9 @@ def handler(get_context):
             response = {"content": "Error: Invalid request. Not supported language. Only 'English', 'German', 'French', 'Spanish' is allowed."}
             return response, 400
 
-        # First call, session is empty
-        if not session:
+        # First call, session messages is empty
+        # Session could already exist
+        if not session["messages"]:
             print("First call")
             # There is no existing session.
             # Set messages to the context
