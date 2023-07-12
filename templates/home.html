@@ -18,7 +18,7 @@
 
     <p>
       Welcome to StudyAI, an AI chatbot for practicing everyday life situations in a foreign language.<br>
-      This website is a demo website and you might encounter some bugs. Sorry!
+      This website is a demo website which uses autotranslation. Therefore some languages might work better than others!
     </p>
 
     <ol>
@@ -28,6 +28,7 @@
       <li>Select a scenario that you want to practice.</li>
       <li>Press "Talk to me" to initiate the conversation or press "Start over" to delete the current conversation.
         The chatbot will forget everything that was talked before.</li>
+      <li>If you change the language or the sceario via the dropdown menu, the current conversation will be resettet.</li>
     </ol>
 
     <div class="dropdown-container">
@@ -71,15 +72,18 @@
       selectedLanguage = document.getElementById("language-dropdown").value;
       // Call function or perform desired actions with selectedLanguage
       console.log("Selected language:", selectedLanguage);
+      resetRequest()
     }
 
     function scenarioChange() {
       selectedScenario = document.getElementById("scenario-dropdown").value;
       // Set variable or perform desired actions with selectedScenario
       console.log("Selected scenario:", selectedScenario);
+      resetRequest()
     }
 
     function sendRequest() {
+      console.log("SEND triggered")
       var textField = document.getElementById("textField");
       var textArea = document.getElementById("textArea");
       var sendButton = document.getElementById("sendButton");
@@ -95,18 +99,14 @@
 
       //console.log(selectedLanguage, selectedScenario, textArea.value);
 
+      // Set url
+      url = "http://studyai.us-east-1.elasticbeanstalk.com/api/v1/chat"
+
       // Create an HTTP request
       var xhr = new XMLHttpRequest();
-      // Change url according to selected scenario
-
-      dictScenarios = {
-        "pizza": "http://studyai.us-east-1.elasticbeanstalk.com/api/v1/pizza",
-        "delivery": "http://studyai.us-east-1.elasticbeanstalk.com/api/v1/delivery"
-      }
-      var url = dictScenarios[selectedScenario]
 
       // Set the request parameters
-      var params = "role=user&content=" + encodeURIComponent(content) + "&language=" + selectedLanguage;
+      var params = "role=user&content=" + encodeURIComponent(content) + "&language=" + selectedLanguage + "&scenario=" + selectedScenario;
 
       // Configure the request
       xhr.open("POST", url, true);
@@ -142,6 +142,7 @@
     // sends a request to delete the current conversation/content on the server session
     // deletes the text area
     function resetRequest() {
+      console.log("RESET triggered")
 
       // Disable the button after klicking
       resetButton.disabled = true;
@@ -149,12 +150,11 @@
       // Create an HTTP request
       var xhr = new XMLHttpRequest();
 
-      // change url to 
+      // Set url
       var url = "http://studyai.us-east-1.elasticbeanstalk.com/api/v1/resetsession";
 
       // Configure the request
       xhr.open("GET", url, true);
-      //xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
       // Send the request
       xhr.send();

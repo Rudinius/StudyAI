@@ -1,8 +1,10 @@
+import os
 import openai
 
+# Get API key from environment variables
 # Set the API key
-API_KEY = "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"
-openai.api_key  = API_KEY
+API_KEY = os.environ.get('API_KEY')
+openai.api_key = API_KEY
 
 def get_completion_from_messages(messages, temperature, model="gpt-3.5-turbo"):
     response = openai.ChatCompletion.create(

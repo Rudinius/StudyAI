@@ -2,7 +2,6 @@ from flask import Flask, request, session, render_template
 from concurrent.futures import ThreadPoolExecutor
 from api_call_openai import conversation
 from context import contexts
-#from context import delivery
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key'
@@ -14,31 +13,19 @@ executor = ThreadPoolExecutor()
 def home():
     return render_template("home.html")
 
-@app.route('/api/v1/pizza', methods=['POST'])
-def pizza_handler_v1():
+@app.route('/api/v1/chat', methods=['POST'])
+def handler_v1():
 
-    # Pass the get_context_pizza function to handler
-    return handler(contexts.get_context_pizza)
-
-@app.route('/api/v1/delivery', methods=['POST'])
-def delivery_handler_v1():
-
-    # Pass the get_context_delivery function to handler
-    return handler(contexts.get_context_delivery)
-
-@app.route('/api/v1/resetsession', methods=['GET'])
-def resetsession_handler_v1():
-    if session.get("messages"):
-        session["messages"] = ""
-        return "Session cleared", 200
-    else:
-        return "Session not found/was empty already", 200
-
-
-def handler(get_context):
-
+    # Create supported parameters
     supported_roles = ['user']
     supported_languages = ['English', 'German', 'French', 'Spanish']
+    supported_scenarios = ['delivery', 'pizza']
+
+    # Create lookup dictionary for scenarios
+    dictScenarios = {
+        "pizza": contexts.get_context_pizza,
+        "delivery": contexts.get_context_delivery,
+    }
 
     try:
 
@@ -46,8 +33,7 @@ def handler(get_context):
         role = request.form.get('role')
         content = request.form.get('content')
         language = request.form.get('language')
-
-        # Check if the payload is correct
+        scenario = request.form.get('scenario')
 
         # Empty content is not allowed
         if not content:
@@ -65,14 +51,23 @@ def handler(get_context):
             response = {"content": "Error: Invalid request. Not supported language. Only 'English', 'German', 'French', 'Spanish' is allowed."}
             return response, 400
 
-        # First call, session messages is empty
+        # Check the correct scenario
+        if scenario not in supported_scenarios:
+            response = {"content": "Error: Invalid request. Not supported scenario. Only 'delivery', 'pizza' is allowed."}
+            return response, 400
+
+        # First call, session messages is empty or does not exist
         # Session could already exist
-        if not session["messages"]:
+        if not session.get("messages"):
             print("First call")
             # There is no existing session.
             # Set messages to the context
+            
+            # Select scenario from dict
+            selected_scenario = dictScenarios[scenario]
+
             # Call the passed function to receive context in given language
-            messages =  get_context(language)
+            messages = selected_scenario(language)
 
         # Consecutive call, session is not empty
         else:
@@ -99,6 +94,15 @@ def handler(get_context):
         print(error)
         return "Sorry! Something went wrong.", 500
 
+@app.route('/api/v1/resetsession', methods=['GET'])
+def resetsession_handler_v1():
+    # Check if key exists
+    # If exists, then delete key
+    if "messages" in session:
+        del session["messages"]
+        return "Session cleared", 200
+    else:
+        return "Session not found/was empty already", 200
 
 def apicall(messages, role, content):
 
