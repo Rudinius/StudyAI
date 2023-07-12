@@ -28,25 +28,26 @@
       <li>Select a scenario that you want to practice.</li>
       <li>Press "Talk to me" to initiate the conversation or press "Start over" to delete the current conversation.
         The chatbot will forget everything that was talked before.</li>
-      <li>If you change the language or the sceario via the dropdown menu, the current conversation will be resettet.</li>
+      <li>If you change the language or the sceario via the dropdown menu, the current conversation will be resettet.
+      </li>
     </ol>
 
     <div class="dropdown-container">
       <div class="dropdown">
         <label for="language-dropdown">Language:</label>
         <select id="language-dropdown" onchange="languageChange()">
-          <option value="english">English</option>
-          <option value="german">German</option>
-          <option value="french">French</option>
-          <option value="spanish">Spanish</option>
+          <option value="English">English</option>
+          <option value="German">German</option>
+          <option value="French">French</option>
+          <option value="Spanish">Spanish</option>
         </select>
       </div>
 
       <div class="dropdown">
         <label for="scenario-dropdown">Scenario:</label>
         <select id="scenario-dropdown" onchange="scenarioChange()">
-          <option value="delivery">Delivery</option>
-          <option value="pizza">Pizza</option>
+          <option value="Delivery">Delivery</option>
+          <option value="Pizza">Pizza</option>
         </select>
       </div>
     </div>
@@ -65,42 +66,57 @@
 
   <script>
 
-    var selectedLanguage = document.getElementById("language-dropdown").value
+    // For local dev
+    const url = "http://127.0.0.1:5000";
+
+    // For deployment
+    //const url = "http://studyai.us-east-1.elasticbeanstalk.com"
+
+    var textField = document.getElementById("textField");
+
+    var selectedLanguage = document.getElementById("language-dropdown").value;
     var selectedScenario = document.getElementById("scenario-dropdown").value;
+
+    textField.disabled = true;
 
     function languageChange() {
       selectedLanguage = document.getElementById("language-dropdown").value;
       // Call function or perform desired actions with selectedLanguage
       console.log("Selected language:", selectedLanguage);
-      resetRequest()
+      resetRequest();
     }
 
     function scenarioChange() {
       selectedScenario = document.getElementById("scenario-dropdown").value;
       // Set variable or perform desired actions with selectedScenario
       console.log("Selected scenario:", selectedScenario);
-      resetRequest()
+      resetRequest();
     }
 
     function sendRequest() {
       console.log("SEND triggered")
-      var textField = document.getElementById("textField");
+      //var textField = document.getElementById("textField");
+
       var textArea = document.getElementById("textArea");
       var sendButton = document.getElementById("sendButton");
 
-      // Disable the button after klicking
+      // Enable text field input, after conversation has been started
+      textField.disabled = false
+
+      // Disable the send button after klicking
       sendButton.disabled = true;
 
       // Get the content from the text field
       var content = textField.value;
 
       // Copy the content to the text area
-      textArea.value += "User: " + content + "\n";
+      // textArea.value += "User: " + content + "\n";
+      textArea.value += content + "\n"; // do not print user before output
 
       //console.log(selectedLanguage, selectedScenario, textArea.value);
 
       // Set url
-      url = "http://studyai.us-east-1.elasticbeanstalk.com/api/v1/chat"
+      const endpoint = "/api/v1/chat"
 
       // Create an HTTP request
       var xhr = new XMLHttpRequest();
@@ -109,11 +125,8 @@
       var params = "role=user&content=" + encodeURIComponent(content) + "&language=" + selectedLanguage + "&scenario=" + selectedScenario;
 
       // Configure the request
-      xhr.open("POST", url, true);
+      xhr.open("POST", url + endpoint, true);
       xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-      // Send the request
-      xhr.send(params);
 
       // Handle the response from the server
       xhr.onreadystatechange = function () {
@@ -125,7 +138,7 @@
             // In case of successful request/response
             // Append the response to the text area
             var response = JSON.parse(xhr.responseText);
-            textArea.value += response.content + "\n";
+            textArea.value += response.role + ": " + response.content + "\n";
           }
           else {
             // At the moment no difference to "200" response
@@ -134,6 +147,9 @@
           }
         }
       };
+
+      // Send the request
+      xhr.send(params);
 
       // Clear the text field
       textField.value = "";
@@ -144,26 +160,30 @@
     function resetRequest() {
       console.log("RESET triggered")
 
+      // Disable the send button after klicking
+      sendButton.disabled = true;
+
+      // Disable text field input, until start button has been hit
+      textField.disabled = true
+
       // Disable the button after klicking
       resetButton.disabled = true;
 
-      // Create an HTTP request
-      var xhr = new XMLHttpRequest();
-
       // Set url
-      var url = "http://studyai.us-east-1.elasticbeanstalk.com/api/v1/resetsession";
+      const endpoint = "/api/v1/resetsession";
 
+      // Create an HTTP request
       // Configure the request
-      xhr.open("GET", url, true);
-
-      // Send the request
-      xhr.send();
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url + endpoint, true);
 
       // Handle the response from the server
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-          // Re-enable the button
+          // Re-enable the reset button
           resetButton.disabled = false;
+          // Re-enable the send button after klicking
+          sendButton.disabled = false;
 
           if (xhr.status === 200 || true) { //true for debugging
             // In case of successful request/response
@@ -174,7 +194,10 @@
             // handle unsuccesfull response
           }
         }
-      }
+      };
+
+      // Send the request
+      xhr.send();
 
       // Clear the text field
       textField.value = "";

@@ -2,10 +2,13 @@ from flask import Flask, request, session, render_template
 from concurrent.futures import ThreadPoolExecutor
 from api_call_openai import conversation
 from context import contexts
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key'
 app.config['PERMANENT_SESSION_LIFETIME'] = 900
+
+CORS(app)
 
 executor = ThreadPoolExecutor()
 
@@ -19,12 +22,12 @@ def handler_v1():
     # Create supported parameters
     supported_roles = ['user']
     supported_languages = ['English', 'German', 'French', 'Spanish']
-    supported_scenarios = ['delivery', 'pizza']
+    supported_scenarios = ['Delivery', 'Pizza']
 
     # Create lookup dictionary for scenarios
     dictScenarios = {
-        "pizza": contexts.get_context_pizza,
-        "delivery": contexts.get_context_delivery,
+        "Pizza": contexts.get_context_pizza,
+        "Delivery": contexts.get_context_delivery,
     }
 
     try:
@@ -36,9 +39,9 @@ def handler_v1():
         scenario = request.form.get('scenario')
 
         # Empty content is not allowed
-        if not content:
-            response = {"content": "Error: Invalid request. Content is empty."}
-            return response, 400
+        #if not content:
+        #    response = {"content": "Error: Invalid request. Content is empty."}
+        #    return response, 400
 
         # In order to protect from setting different system messages,
         # only certain roles are allowed
@@ -53,7 +56,7 @@ def handler_v1():
 
         # Check the correct scenario
         if scenario not in supported_scenarios:
-            response = {"content": "Error: Invalid request. Not supported scenario. Only 'delivery', 'pizza' is allowed."}
+            response = {"content": "Error: Invalid request. Not supported scenario. Only 'Delivery', 'Pizza' is allowed."}
             return response, 400
 
         # First call, session messages is empty or does not exist
@@ -85,7 +88,11 @@ def handler_v1():
         # Save the new messages array in session object
         session["messages"] = messages
 
-        response = {"content": f"{role}: {content}"}
+        #response = {"content": f"{role}: {content}"}
+        response = {
+            "content": content,
+            "role": role,
+        }
         
         return response, 200
 

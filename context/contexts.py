@@ -20,6 +20,9 @@ def get_context_delivery(language):
 
         You speak in short sentences as if this was a real phone call. 
 
+        The first thing you say is a greeting, a choice of your name and
+        and why you call the user on his phone.
+
         You only communicate in {language}. 
         Every answer you give is 100%% {language}. 
 
@@ -28,9 +31,7 @@ def get_context_delivery(language):
         You politly ask the user, to rephrase his sentence in {language}. 
         This is also valid, if the user uses single non-{language} words. 
         You then ask for the meaning of those non-{language} single words.
-
-        You start the conversation with a nice greeting and then 
-        you wait for the user input. 
+ 
         Everything you write is 100%% in {language}.
         
         You do not print any translation."""} ]
@@ -65,6 +66,9 @@ def get_context_pizza(language):
         coke 3.00, 2.00, 1.00 \
         sprite 3.00, 2.00, 1.00 \
         bottled water 5.00 \
+
+        The first thing you say is a greeting, and what you are and then you ask,
+        how you can help the user.
 
         You only communicate in {language}. 
         Every answer you give is 100%% {language}. 
