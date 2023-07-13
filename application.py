@@ -2,13 +2,10 @@ from flask import Flask, request, session, render_template
 from concurrent.futures import ThreadPoolExecutor
 from api_call_openai import conversation
 from context import contexts
-from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = 'super-secret-key'
 app.config['PERMANENT_SESSION_LIFETIME'] = 900
-
-CORS(app)
 
 executor = ThreadPoolExecutor()
 
@@ -37,11 +34,6 @@ def handler_v1():
         content = request.form.get('content')
         language = request.form.get('language')
         scenario = request.form.get('scenario')
-
-        # Empty content is not allowed
-        #if not content:
-        #    response = {"content": "Error: Invalid request. Content is empty."}
-        #    return response, 400
 
         # In order to protect from setting different system messages,
         # only certain roles are allowed
@@ -75,6 +67,12 @@ def handler_v1():
         # Consecutive call, session is not empty
         else:
             print("Consecutive call")
+
+            # Empty content is not allowed in consecutive calls
+            if not content:
+                response = {"content": "Error: Invalid request. Content is empty."}
+                return response, 400
+
             # There is an existing session.
             # Retrieve the messages from that session
             messages = session.get("messages")

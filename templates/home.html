@@ -4,17 +4,19 @@
 <head>
   <meta charset="UTF-8">
   <title>StudyAI</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
 </head>
 
 <body>
 
-  <div class="container">
-
+  <div class="header">
     <header>
       <h1>StudyAI</h1>
     </header>
+  </div>
+
+  <div class="container">
 
     <p>
       Welcome to StudyAI, an AI chatbot for practicing everyday life situations in a foreign language.<br>
@@ -73,30 +75,31 @@
     //const url = "http://studyai.us-east-1.elasticbeanstalk.com"
 
     var textField = document.getElementById("textField");
-
     var selectedLanguage = document.getElementById("language-dropdown").value;
     var selectedScenario = document.getElementById("scenario-dropdown").value;
 
+    // Disable textfield, until conversation has been started
     textField.disabled = true;
+
+    textField.addEventListener('input', function () {
+      if (textField.value.trim() === '') {
+        sendButton.disabled = true;
+      } else {
+        sendButton.disabled = false;
+      }
+    });
 
     function languageChange() {
       selectedLanguage = document.getElementById("language-dropdown").value;
-      // Call function or perform desired actions with selectedLanguage
-      console.log("Selected language:", selectedLanguage);
       resetRequest();
     }
 
     function scenarioChange() {
       selectedScenario = document.getElementById("scenario-dropdown").value;
-      // Set variable or perform desired actions with selectedScenario
-      console.log("Selected scenario:", selectedScenario);
       resetRequest();
     }
 
     function sendRequest() {
-      console.log("SEND triggered")
-      //var textField = document.getElementById("textField");
-
       var textArea = document.getElementById("textArea");
       var sendButton = document.getElementById("sendButton");
 
@@ -109,11 +112,10 @@
       // Get the content from the text field
       var content = textField.value;
 
-      // Copy the content to the text area
-      // textArea.value += "User: " + content + "\n";
-      textArea.value += content + "\n"; // do not print user before output
-
-      //console.log(selectedLanguage, selectedScenario, textArea.value);
+      // Copy the content to the text area if content is not empty
+      if (content !== "") {
+        textArea.value += "User: " + content + "\n";
+      }
 
       // Set url
       const endpoint = "/api/v1/chat"
@@ -132,7 +134,8 @@
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
           // Re-enable the button
-          sendButton.disabled = false;
+          //sendButton.disabled = false;
+          //sendButton.disabled = true;
 
           if (xhr.status === 200) {
             // In case of successful request/response
@@ -141,9 +144,9 @@
             textArea.value += response.role + ": " + response.content + "\n";
           }
           else {
-            // At the moment no difference to "200" response
+            console.error("unsuccessful request: " + xhr.status)
             var response = JSON.parse(xhr.responseText);
-            textArea.value += response.content + "\n";
+            textArea.value += response.content + ": " + xhr.status + "\n";
           }
         }
       };
@@ -158,7 +161,6 @@
     // sends a request to delete the current conversation/content on the server session
     // deletes the text area
     function resetRequest() {
-      console.log("RESET triggered")
 
       // Disable the send button after klicking
       sendButton.disabled = true;
@@ -185,13 +187,13 @@
           // Re-enable the send button after klicking
           sendButton.disabled = false;
 
-          if (xhr.status === 200 || true) { //true for debugging
+          if (xhr.status === 200) {
             // In case of successful request/response
             // Delete the content of text area
             textArea.value = "";
           }
           else {
-            // handle unsuccesfull response
+            console.error("unsuccessful request: " + xhr.status)
           }
         }
       };
