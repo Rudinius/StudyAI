@@ -38,9 +38,10 @@
         <label for="language-dropdown">Language:</label>
         <select id="language-dropdown" onchange="languageChange()">
           <option value="English">English</option>
-          <option value="German">German</option>
           <option value="French">French</option>
+          <option value="German">German</option>
           <option value="Spanish">Spanish</option>
+          <option value="Vietnamese">Vietnamese</option>
         </select>
       </div>
 
@@ -70,6 +71,15 @@
     var textField = document.getElementById("textField");
     var selectedLanguage = document.getElementById("language-dropdown").value;
     var selectedScenario = document.getElementById("scenario-dropdown").value;
+
+    // Listen for the "keydown" event on the input field
+    textField.addEventListener('keydown', function (event) {
+      // Check if the pressed key is the "Enter" key
+      if (event.key === 'Enter') {
+        // Activate the button
+        sendButton.click();
+      }
+    });
 
     // Disable textfield, until conversation has been started
     textField.disabled = true;
@@ -126,9 +136,6 @@
       // Handle the response from the server
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-          // Re-enable the button
-          //sendButton.disabled = false;
-          //sendButton.disabled = true;
 
           if (xhr.status === 200) {
             // In case of successful request/response

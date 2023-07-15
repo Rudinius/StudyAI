@@ -2,6 +2,7 @@
 
 # Delivery
 def get_context_delivery(language):
+
     return [ {'role':'system', 'content':f"""
         You are a package delivery person. You contact the user per mobile phone. 
         This means that you call the user on his phone to deliver his package. 

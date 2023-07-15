@@ -1,6 +1,0 @@
-cd var/app/venv/staging.../bin
-source activate
-
-cd var/app/current
-gunicorn -b 0.0.0.0:8080 application:app
-

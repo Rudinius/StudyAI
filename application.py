@@ -18,7 +18,7 @@ def handler_v1():
 
     # Create supported parameters
     supported_roles = ['user']
-    supported_languages = ['English', 'German', 'French', 'Spanish']
+    supported_languages = ['English', 'German', 'French', 'Spanish', 'Vietnamese']
     supported_scenarios = ['Delivery', 'Pizza']
 
     # Create lookup dictionary for scenarios

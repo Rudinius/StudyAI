@@ -1,0 +1,15 @@
+///// Manually activate venv on EC2
+
+cd var/app/venv/staging.../bin
+source activate
+
+///// Manually start gunicorn server
+
+cd var/app/current
+gunicorn -b 0.0.0.0:8080 application:app
+
+
+/////
+
+ENV variabels are set with the EBS Configutation > Environment properties
+and can be accessed via import os > os.environ.get()
